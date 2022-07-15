@@ -1,0 +1,14 @@
+{
+  "name": "how-to-generate-chat-transcripts-for-a-talkjs-chat",
+  "version": "1.0.0",
+  "description": "In this tutorial, we will walk you through the steps to send announcements across multiple conversations in a TalkJS inbox. We will use the TalkJS JavaScript SDK along with the TalkJS System Messages API to implement the announcements.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sapnesh Naik <sapnesh@kerneldev.com>",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
+}
