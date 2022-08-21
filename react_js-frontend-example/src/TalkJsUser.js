@@ -17,7 +17,7 @@ const TalkJsUser = (props) => {
     Talk.ready
       .then(() => {
         console.log("talk ready");
-        var meUser = new Talk.User({
+        const meUser = new Talk.User({
           id: props.me.id,
           name: props.me.name,
           email: props.me.email,
@@ -41,20 +41,20 @@ const TalkJsUser = (props) => {
 
   useEffect(() => {
     if (talkSession != null && me != null) {
-      var other = new Talk.User({
+      const other = new Talk.User({
         id: props.other.id,
         name: props.other.name,
         email: props.other.email,
         photoUrl: props.other.photo,
       });
 
-      var conversation = talkSession.getOrCreateConversation(
+      const conversation = talkSession.getOrCreateConversation(
         Talk.oneOnOneId(me, other)
       );
       conversation.setParticipant(me);
       conversation.setParticipant(other);
 
-      var inbox = talkSession.createInbox({ selected: conversation });
+      const inbox = talkSession.createInbox({ selected: conversation });
       inbox.mount(talkjsContainer.current);
 
       setConversation(conversation);
@@ -69,7 +69,7 @@ const TalkJsUser = (props) => {
   ]);
 
   const downloadChatTranssript = () => {
-    var config = {
+    const config = {
       method: "get",
       url: "http://localhost:3500/transcript/" + conversation.id + "/generate",
       headers: {},
@@ -77,7 +77,7 @@ const TalkJsUser = (props) => {
 
     axios(config)
       .then(function (response) {
-        var transcript = "";
+        let transcript = "";
 
         response.data.forEach((element) => {
           transcript =

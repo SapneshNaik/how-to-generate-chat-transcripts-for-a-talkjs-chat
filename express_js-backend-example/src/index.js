@@ -8,10 +8,9 @@ const secretKey = "secret-key";
 
 app.get("/transcript/:conversationId/generate", (req, res) => {
   //Define TalkJS API call options
-  var options = {
+  const options = {
     method: "GET",
-    url:
-      "https://api.talkjs.com/v1/" +
+    url: "https://api.talkjs.com/v1/" +
       appId +
       "/conversations/" +
       req.params.conversationId +
@@ -24,9 +23,6 @@ app.get("/transcript/:conversationId/generate", (req, res) => {
   //make API call to fetch messages of the given conversationID
   axios(options)
     .then(function (response) {
-      var senderIDs = new Set(); //store unique set of senderIDs
-      var senderDetails = {}; //store unique set of senderIDs
-      var promises = [];
 
       res.status(response.status); //set status send by TalkJS API response
 
@@ -38,37 +34,42 @@ app.get("/transcript/:conversationId/generate", (req, res) => {
       );
       res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
 
+      let senderIDs = new Set(); //store unique set of senderIDs
       //Build unique set of senderIds from messages response and sort messages (latest message is last)
-      var tempData = response.data.data.sort((a, b) => {
+      let messages = response.data.data.sort((a, b) => {
         senderIDs.add(a.senderId);
         senderIDs.add(b.senderId);
-
-        if (a.createdAt > b.createdAt) return 1;
-        else return -1;
+        return a.createdAt - b.createdAt
       });
 
+      console.log("Here")
+
+      let promises = [];
       //store senderdetail promises
-      var senderIDArr = [...senderIDs];
-      for (var i = 0; i < senderIDArr.length; i++) {
-        promises.push(getSenderDetails(senderIDArr[i]));
-      }
+      senderIDs.forEach((value) => {
+        promises.push(getSenderDetails(value));
+
+      });
+
+      console.log("Hereagain")
+
 
       //resolve promises and add sender name, email & photourl to output
       Promise.all(promises).then((responses) => {
-        for (var i = 0; i < responses.length; i++) {
-          senderDetails[responses[i].data.id] = responses[i].data.name;
+        const senderNames = {};
+        for (let response of responses) {
+          senderNames[response.data.id] = response.data.name;
         }
-
-        for (var k = 0; k < tempData.length; k++) {
+        for (let message of messages) {
           //add datetime
-          tempData[k].createdDateTime = new Date(
-            tempData[k].createdAt
+          message.createdDateTime = new Date(
+            message.createdAt
           ).toGMTString();
 
-          //add name
-          tempData[k].senderName = senderDetails[tempData[k].senderId];
+          //add sender name
+          message.senderName = senderNames[message.senderId];
 
-          //delete unnecessary information
+          //delete unnecessary attributes
           [
             "attachment",
             "conversationId",
@@ -82,10 +83,10 @@ app.get("/transcript/:conversationId/generate", (req, res) => {
             "type",
             "createdAt",
             "senderId",
-          ].forEach((e) => delete tempData[k][e]);
+          ].forEach((attribute) => delete message[attribute]);
         }
 
-        res.json(tempData);
+        res.json(messages);
       });
     })
     .catch(function (error) {
@@ -95,7 +96,7 @@ app.get("/transcript/:conversationId/generate", (req, res) => {
 
 //returns a promise to make API call for sender details from senderID
 function getSenderDetails(senderId) {
-  var options = {
+  const options = {
     method: "GET",
     url: "https://api.talkjs.com/v1/" + appId + "/users/" + senderId,
     headers: {
